@@ -4,7 +4,7 @@ from logger import crawler
 from .workers import app
 from page_parse.user import public
 from page_get import get_page
-from config import (get_max_home_page, get_time_after)
+from config import (get_max_home_page, get_time_after, get_home_page_ori)
 from db.dao import (
     WbDataOper, SeedidsOper)
 from page_parse.home import (
@@ -43,9 +43,14 @@ def crawl_ajax_page(url, auth_level):
 @app.task(ignore_result=True)
 def crawl_weibo_datas(uid):
     limit = get_max_home_page()
+    user_ori = get_home_page_ori()
     cur_page = 1
     while cur_page <= limit:
         url = HOME_URL.format(uid, cur_page)
+
+        if user_ori:
+            url = '%s&is_ori=1' % url
+
         if cur_page == 1:
             html = get_page(url, auth_level=1)
         else:

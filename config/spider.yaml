@@ -12,6 +12,8 @@ max_repost_page: 2000          # max repost page for crawling
 max_dialogue_page: 2000        # max dialogue page for crawling
 max_retries: 5                 # retry times for crawling
 
+home_page_ori: 0               # get user original content, 0:No, 1:Yes
+
 # You should set the args below if you login from uncommon place
 # It's for verification code indentified
 yundama_username: xxxxxx           # account for yundama
