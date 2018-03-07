@@ -124,3 +124,8 @@ def get_images_type():
 
 def get_time_after():
     return cf.get('time_after')
+
+
+def get_home_page_ori():
+    return cf.get('home_page_ori')
+
