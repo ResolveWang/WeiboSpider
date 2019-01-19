@@ -26,7 +26,8 @@ def search_keyword(keyword, keyword_id):
     while cur_page < LIMIT:
         cur_url = URL.format(encode_keyword, cur_page)
         # current only for login, maybe later crawling page one without login
-        search_page = get_page(cur_url, auth_level=2)
+        # now without login also can claw update 2019.1.19
+        search_page = get_page(cur_url, auth_level=1)
         if not search_page:
             crawler.warning('No search result for keyword {}, the source page is {}'.format(keyword, search_page))
             return
