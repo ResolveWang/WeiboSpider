@@ -51,13 +51,6 @@ def get_feed_info(feed_infos, goal):
 def get_weibo_info(each, html):
     wb_data = WeiboData()
 
-    # user_cont = each.find(attrs={'class': 'face'})
-    # usercard = user_cont.find('img').get('usercard', '')
-    # # this only for login user
-    # if not usercard:
-    #     return None
-    # wb_data.uid = usercard.split('&')[0][3:]
-
     try:
         wb_data.weibo_id = each['mid']
     except (AttributeError, IndexError, TypeError):
@@ -72,25 +65,28 @@ def get_weibo_info(each, html):
     except Exception:
         wb_data.weibo_img = ''
 
-    # if IMG_ALLOW and imgs and imgs_url:
-    #     app.send_task('tasks.downloader.download_img_task', args=(wb_data.weibo_id, imgs_url),
-    #                   queue='download_queue', routing_key='for_download')
-    #     wb_data.weibo_img_path = IMG_PATH
-    # else:
-    #     wb_data.weibo_img_path = ''
+    if IMG_ALLOW and imgs and imgs_url:
+        app.send_task('tasks.downloader.download_img_task', args=(wb_data.weibo_id, imgs_url),
+                      queue='download_queue', routing_key='for_download')
+        wb_data.weibo_img_path = IMG_PATH
+    else:
+        wb_data.weibo_img_path = ''
 
-    # try:
-    #     a_tag = str(each.find(attrs={'node-type': 'feed_list_media_prev'}).find_all('a'))
-    #     extracted_url = urllib.parse.unquote(re.findall(r"full_url=(.+?)&amp;", a_tag)[0])
-    #     wb_data.weibo_video = url_filter(extracted_url)
-    # except Exception:
-    #     wb_data.weibo_video = ''
+    # todo 没找到vedio的测试数据
+    try:
+        a_tag = str(each.find(attrs={'node-type': 'feed_list_media_prev'}).find_all('a'))
+        extracted_url = urllib.parse.unquote(re.findall(r"full_url=(.+?)&amp;", a_tag)[0])
+        wb_data.weibo_video = url_filter(extracted_url)
+    except Exception:
+        wb_data.weibo_video = ''
+
     try:
         wb_data.device = each.find(attrs={'class': 'from'}).find(attrs={'rel': 'nofollow'}).text
     except AttributeError:
         wb_data.device = ''
 
     try:
+        # todo 日期格式化,会有今日XXX，X分钟前等噪音
         wb_data.create_time = each.find(attrs={'class': 'from'}).find(attrs={'target': '_blank'}).text.strip()
         wb_data.weibo_url = 'https:'+each.find(attrs={'class': 'from'}).find(attrs={'target': '_blank'})['href']
         wb_data.uid = each.find(attrs={'class': 'from'}).find(attrs={'target': '_blank'})['href'].split('/')[3]
@@ -98,6 +94,19 @@ def get_weibo_info(each, html):
         wb_data.create_time = ''
         wb_data.weibo_url = ''
         wb_data.weibo_uid = ''
+
+    try:
+        wb_data.repost_num = int(each.find(attrs={'class': 'card-act'}).find_all('li')[0].find('a').text.split('/')[-1])
+    except (AttributeError, ValueError):
+        wb_data.repost_num = 0
+    try:
+        wb_data.comment_num = int(each.find(attrs={'class': 'card-act'}).find_all('li')[1].find('a').text.split('/')[-1])
+    except (AttributeError, ValueError):
+        wb_data.comment_num = 0
+    try:
+        wb_data.praise_num = int(each.find(attrs={'class': 'card-act'}).find_all('li')[2].find('a').find('em').text)
+    except (AttributeError, ValueError):
+        wb_data.praise_num = 0
 
     if '展开全文' in str(each):
         is_all_cont = 1
