@@ -54,7 +54,8 @@ def get_weibo_info(each, html):
     try:
         wb_data.weibo_id = each['mid']
     except (AttributeError, IndexError, TypeError):
-        wb_data.weibo_id = ''
+        parser.error('Failed to get weibo id, the page source is {}'.format(html))
+        return None
 
     imgs = list()
     imgs_url = list()
