@@ -6,6 +6,8 @@ from logger import parser
 from db.models import WeiboRepost
 from db.redis_db import IdNames
 from decorators import parse_decorator
+from page_parse.interact_time import (
+    get_create_time_from_text, get_create_time_from_text_default_error_handler)
 
 
 REPOST_URL = 'http://weibo.com{}'
@@ -56,11 +58,18 @@ def get_repost_list(html, mid):
             wb_repost.weibo_id = repost['mid']
             # TODO 将wb_repost.user_id加入待爬队列（seed_ids）
             wb_repost.user_id = repost.find(attrs={'class': 'WB_face W_fl'}).find('a').get('usercard')[3:]
-            wb_repost.user_name = repost.find(attrs={'class': 'list_con'}).find(attrs={'class': 'WB_text'}).find('a').\
-                text
-            wb_repost.repost_time = repost.find(attrs={'class': 'WB_from S_txt2'}).find('a').get('title')
-            wb_repost.weibo_url = REPOST_URL.format(repost.find(attrs={'class': 'WB_from S_txt2'}).find('a').
-                                                    get('href'))
+            wb_repost.user_name = repost.find(attrs={'class': 'list_con'}).find(attrs={'class': 'WB_text'}).find('a').text
+
+            create_time_str = repost.find(attrs={'class': 'WB_from S_txt2'}).find('a').get('title')
+            try:
+                create_time = get_create_time_from_text(create_time_str)
+            except ValueError as e:
+                create_time = get_create_time_from_text_default_error_handler(
+                    create_time_str, e)
+            create_time_str = create_time.strftime("%Y-%m-%d %H:%M:%S")
+            wb_repost.repost_time = create_time_str
+
+            wb_repost.weibo_url = repost.find(attrs={'class': 'WB_from S_txt2'}).find('a').get('href')
             parents = repost.find(attrs={'class': 'WB_text'}).find(attrs={'node-type': 'text'})
             wb_repost.root_weibo_id = mid
 

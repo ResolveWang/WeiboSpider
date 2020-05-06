@@ -48,5 +48,3 @@ def is_403(html):
 
 def is_complete(html):
     return True if 'uid' in html else False
-
-

@@ -3,7 +3,6 @@ import time
 import signal
 
 import requests
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 from config import headers
 from logger import crawler
@@ -26,9 +25,10 @@ MAX_RETRIES = get_max_retries()
 EXCP_INTERAL = get_excp_interal()
 COOKIES = get_cookies()
 
-
-# Disable annoying InsecureRequestWarning
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+# Instead of disable warning, why not use it as docs suggested
+# https://stackoverflow.com/questions/42982143/python-requests-how-to-use-system-ca-certificates-debian-ubuntu
+os.environ['REQUESTS_CA_BUNDLE'] = os.path.join(os.sep, '/etc/ssl/certs',
+                                                'ca-certificates.crt')
 
 
 def is_banned(url):
