@@ -76,7 +76,7 @@ def timeout(seconds):
             thd = KThread(target=_new_func, args=(), kwargs=new_kwargs)
             thd.start()
             thd.join(seconds)
-            alive = thd.isAlive()
+            alive = thd.is_alive()
             thd.kill()  # kill the child thread
 
             if alive:
